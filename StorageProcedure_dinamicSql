@@ -1,0 +1,20 @@
+CREATE OR REPLACE FUNCTION public.<nombre_procedimiento>(<variable de entrada> character varying)
+ RETURNS boolean
+ LANGUAGE plpgsql
+AS $function$		
+DECLARE 	    	    	    
+	i int;	    
+	estado boolean;	    	    	    
+	sql text;			
+BEGIN	    	    	
+	estado = false;	    	    	
+	sql = 'select orden_trabajo.id as id_ot,id_cnt,id_os,id_prog from (select id_cnt, id_os,programacion_actividad.id as id_prog from (select <entity1>.id as id_cnt,orden_servicio.id as id_os from (<entity1> inner join orden_servicio on <entity1>.id = orden_servicio.id_contenedor) where <entity1>.numero_identificador like %L) as tabla3 inner join programacion_actividad on programacion_actividad.id_orden_servicio = id_os where programacion_actividad.id_estado IN (1,2)) as tabla5 inner join orden_trabajo on orden_trabajo.id_programacion_actividad = id_prog where orden_trabajo.id_tipo_orden_trabajo NOT IN (9) and orden_trabajo.estado IN(1,2)';		   					
+	EXECUTE format(sql,<variable de entrada>,'AK');	
+	GET DIAGNOSTICS i = ROW_COUNT;	
+	IF (i > 0) THEN 	
+		estado = true;	
+	END IF;	
+RETURN estado; 		
+END; 		
+$function$
+
